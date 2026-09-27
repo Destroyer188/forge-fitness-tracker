@@ -1,0 +1,32 @@
+{
+  "name": "Forge Fitness Tracker",
+  "short_name": "Forge",
+  "id": "/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0c1118",
+  "background_color": "#0b1016",
+  "description": "Offline dual-mode fitness planner and tracker for calisthenics and gym workouts.",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Log today's workout",
+      "short_name": "Today",
+      "description": "Open today's workout log",
+      "url": "./index.html?shortcut=today"
+    },
+    {
+      "name": "Open Coach",
+      "short_name": "Coach",
+      "description": "Open the Forge Coach",
+      "url": "./index.html?shortcut=coach"
+    }
+  ]
+}

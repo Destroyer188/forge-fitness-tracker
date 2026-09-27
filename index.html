@@ -6,7 +6,9 @@
 <meta name="description" content="Offline dual-mode fitness planner and tracker for calisthenics and gym workouts.">
 <meta name="theme-color" content="#0c1118">
 <title>Forge — Fitness Tracker</title>
-<link rel="manifest" id="manifestLink">
+<link rel="manifest" id="manifestLink" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 :root{
   --bg:#0b1016; --surface:#111923; --surface2:#172230; --surface3:#1d2a39;
@@ -492,62 +494,13 @@ function gymToday(){const tpl=getActiveTemplate(),dn=dayName(),plan=tpl.days[dn]
 function downloadGymICS(){const tpl=getActiveTemplate();if(!tpl){toast('No active gym template to export.','error');return}const now=new Date(),todayIdx=(now.getDay()+6)%7,training=DAYS.map((d,i)=>({d,i})).filter(x=>!tpl.days[x.d]?.isRestDay);if(!training.length){toast('The active template has no training days to export.','error');return}const first=training.find(x=>x.i>=todayIdx)||training[0],offset=(first.i-todayIdx+7)%7,base=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset),stamp=`${base.getFullYear()}${String(base.getMonth()+1).padStart(2,'0')}${String(base.getDate()).padStart(2,'0')}`,end=new Date(base.getFullYear(),base.getMonth(),base.getDate()+1),endStamp=`${end.getFullYear()}${String(end.getMonth()+1).padStart(2,'0')}${String(end.getDate()).padStart(2,'0')}`,by=training.map(x=>x.d.slice(0,2).toUpperCase()).join(',');const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Forge Fitness//Workout Template//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:'+icsEsc(tpl.name),'BEGIN:VEVENT','UID:'+uid('ics')+'@forge','DTSTAMP:'+stamp+'T000000Z','DTSTART;VALUE=DATE:'+stamp,'DTEND;VALUE=DATE:'+endStamp,'RRULE:FREQ=WEEKLY;BYDAY='+by,'SUMMARY:'+icsEsc(tpl.name),'DESCRIPTION:'+icsEsc('Forge weekly training template: '+tpl.name),'END:VEVENT','END:VCALENDAR'];const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`forge-${tpl.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.ics`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Calendar .ics downloaded.','success')}
 
 function applyLaunchShortcut(search=location.search){try{const shortcut=new URLSearchParams(search).get('shortcut');if(shortcut==='today'){activeMode='gym';gymTab='today';state.ui.mode='gym';state.ui.gymTab='today'}else if(shortcut==='coach'){activeMode='cal';calTab='coach';state.ui.mode='cal';state.ui.calTab='coach'}else return;saveState();history.replaceState({},document.title,location.pathname)}catch{}}
-function qolMakeIcon(size){
-  const c=document.createElement('canvas');c.width=size;c.height=size;const ctx=c.getContext('2d');
-  const g=ctx.createLinearGradient(0,0,size,size);g.addColorStop(0,'#60a5fa');g.addColorStop(1,'#6ee7b7');
-  ctx.fillStyle=g;ctx.fillRect(0,0,size,size);
-  ctx.fillStyle='#061119';ctx.font=`900 ${Math.round(size*0.52)}px Inter,system-ui,sans-serif`;
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('F',size/2,size*0.56);
-  return c.toDataURL('image/png');
-}
 function setupManifest(){
-  const icon192=qolMakeIcon(192),icon512=qolMakeIcon(512);
-  const manifest={
-    name:'Forge Fitness Tracker',
-    short_name:'Forge',
-    id:'/',
-    start_url:'./',
-    scope:'./',
-    display:'standalone',
-    orientation:'portrait',
-    theme_color:'#0c1118',
-    background_color:'#0b1016',
-    description:'Offline fitness planner and tracker',
-    icons:[
-      {src:icon192,sizes:'192x192',type:'image/png',purpose:'any'},
-      {src:icon192,sizes:'192x192',type:'image/png',purpose:'maskable'},
-      {src:icon512,sizes:'512x512',type:'image/png',purpose:'any'},
-      {src:icon512,sizes:'512x512',type:'image/png',purpose:'maskable'}
-    ],
-    shortcuts:[{name:"Log today's workout",short_name:'Today',description:"Open today's workout log",url:'?shortcut=today'},{name:'Open Coach',short_name:'Coach',description:'Open the Forge Coach',url:'?shortcut=coach'}]
-  };
-  try{$('#manifestLink').href='data:application/manifest+json;charset=utf-8,'+encodeURIComponent(JSON.stringify(manifest))}catch{}
+  // Manifest is now a static file (manifest.json) linked directly in <head>.
+  // Kept as a no-op for compatibility with existing call site.
 }
 function qolRegisterServiceWorker(){
   if(!('serviceWorker' in navigator))return;
-  try{
-    const swCode=`
-      const CACHE='forge-cache-v1';
-      self.addEventListener('install',e=>{self.skipWaiting();});
-      self.addEventListener('activate',e=>{self.clients.claim();});
-      self.addEventListener('fetch',e=>{
-        if(e.request.method!=='GET')return;
-        e.respondWith(
-          caches.open(CACHE).then(async cache=>{
-            const cached=await cache.match(e.request);
-            const network=fetch(e.request).then(res=>{
-              if(res && res.status===200) cache.put(e.request,res.clone());
-              return res;
-            }).catch(()=>cached);
-            return cached||network;
-          })
-        );
-      });
-    `;
-    const blob=new Blob([swCode],{type:'application/javascript'});
-    const swUrl=URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).catch(()=>{});
-  }catch(e){}
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 function setupGlobal(){
   $('#timerPause').addEventListener('click',()=>timer.running?pauseTimer():resumeTimer());$('#timerReset').addEventListener('click',resetTimer);
