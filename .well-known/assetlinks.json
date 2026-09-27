@@ -1,1 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.destroyer188.twa",
+        "sha256_cert_fingerprints": ["67:69:7E:4D:05:9F:2C:12:C3:2D:7E:81:56:E5:4A:B9:71:98:9D:8F:2D:3F:87:B9:FE:61:F9:F6:F5:8C:3D:3B"]
+      }
+    }]
 
